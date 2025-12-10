@@ -84,6 +84,7 @@ class PvtController extends ChangeNotifier {
   Timer? _testDurationTimer;
   Timer? _timerUpdateTimer;
   Timer? _feedbackTimer;
+  Timer? _stimulusTimeoutTimer;
 
   // Feedback
   int? _lastReactionTimeMs;
@@ -301,8 +302,46 @@ class PvtController extends ChangeNotifier {
     _trialStopwatch.reset();
     _trialStopwatch.start();
 
+    // Start the stimulus timeout timer
+    _stimulusTimeoutTimer?.cancel();
+    _stimulusTimeoutTimer = Timer(_config.stimulusTimeout, _handleStimulusTimeout);
+
     _state = PvtState.stimulusShown;
     notifyListeners();
+  }
+
+  void _handleStimulusTimeout() {
+    if (_state != PvtState.stimulusShown) return;
+
+    _trialStopwatch.stop();
+
+    // Record as miss
+    final trial = TrialData(
+      trialNumber: _currentTrialNumber,
+      stimulusOnsetTime: _stimulusOnsetTime!,
+      responseTime: null,
+      reactionTimeMs: null,
+    );
+
+    if (_isPracticeMode) {
+      _practiceTrials.add(trial);
+    } else {
+      _trials.add(trial);
+    }
+
+    // Check if test should end
+    final testDuration = _isPracticeMode
+        ? PvtConfig.practiceTestDuration
+        : _config.duration;
+    if (_testStopwatch.elapsed >= testDuration) {
+      _endTest();
+      return;
+    }
+
+    // Proceed to next trial
+    _state = PvtState.waitingForStimulus;
+    notifyListeners();
+    _scheduleNextStimulus();
   }
 
   /// Records a response from the user.
@@ -319,6 +358,9 @@ class PvtController extends ChangeNotifier {
     }
 
     if (_state != PvtState.stimulusShown) return null;
+
+    // Cancel the stimulus timeout timer
+    _stimulusTimeoutTimer?.cancel();
 
     final reactionTimeMs = _trialStopwatch.elapsedMilliseconds;
     _trialStopwatch.stop();
@@ -398,6 +440,7 @@ class PvtController extends ChangeNotifier {
     _testDurationTimer?.cancel();
     _timerUpdateTimer?.cancel();
     _feedbackTimer?.cancel();
+    _stimulusTimeoutTimer?.cancel();
 
     // If stimulus was shown but no response, record as miss
     if (_state == PvtState.stimulusShown && _stimulusOnsetTime != null) {
@@ -454,6 +497,7 @@ class PvtController extends ChangeNotifier {
     _testDurationTimer?.cancel();
     _timerUpdateTimer?.cancel();
     _feedbackTimer?.cancel();
+    _stimulusTimeoutTimer?.cancel();
 
     _state = PvtState.idle;
     _countdownValue = 0;
@@ -483,6 +527,7 @@ class PvtController extends ChangeNotifier {
     _testDurationTimer?.cancel();
     _timerUpdateTimer?.cancel();
     _feedbackTimer?.cancel();
+    _stimulusTimeoutTimer?.cancel();
     super.dispose();
   }
 }

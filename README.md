@@ -85,6 +85,7 @@ PvtWidget(
 | `enableHaptic` | true | Vibrate on response |
 | `countdownDuration` | 3 seconds | Pre-test countdown |
 | `enablePracticeTest` | false | 30-second practice before test |
+| `stimulusTimeout` | 30 seconds | Max wait time before recording a miss |
 
 ### PvtStyle
 

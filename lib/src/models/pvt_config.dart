@@ -17,6 +17,7 @@ class PvtConfig {
     this.enableHaptic = true,
     this.countdownDuration = const Duration(seconds: 3),
     this.enablePracticeTest = false,
+    this.stimulusTimeout = const Duration(seconds: 30),
   });
 
   /// The total duration of the test.
@@ -71,6 +72,14 @@ class PvtConfig {
   /// Defaults to false.
   final bool enablePracticeTest;
 
+  /// The maximum time to wait for a response before recording a miss.
+  ///
+  /// If the user doesn't respond within this duration, the trial is recorded
+  /// as a miss and the test proceeds to the next trial.
+  ///
+  /// Defaults to 30 seconds.
+  final Duration stimulusTimeout;
+
   /// The fixed duration for the practice test.
   ///
   /// This is always 30 seconds and is not configurable.
@@ -98,6 +107,7 @@ class PvtConfig {
     bool? enableHaptic,
     Duration? countdownDuration,
     bool? enablePracticeTest,
+    Duration? stimulusTimeout,
   }) {
     return PvtConfig(
       duration: duration ?? this.duration,
@@ -111,6 +121,7 @@ class PvtConfig {
       enableHaptic: enableHaptic ?? this.enableHaptic,
       countdownDuration: countdownDuration ?? this.countdownDuration,
       enablePracticeTest: enablePracticeTest ?? this.enablePracticeTest,
+      stimulusTimeout: stimulusTimeout ?? this.stimulusTimeout,
     );
   }
 
@@ -126,7 +137,8 @@ class PvtConfig {
         other.enableSound == enableSound &&
         other.enableHaptic == enableHaptic &&
         other.countdownDuration == countdownDuration &&
-        other.enablePracticeTest == enablePracticeTest;
+        other.enablePracticeTest == enablePracticeTest &&
+        other.stimulusTimeout == stimulusTimeout;
   }
 
   @override
@@ -141,6 +153,7 @@ class PvtConfig {
       enableHaptic,
       countdownDuration,
       enablePracticeTest,
+      stimulusTimeout,
     );
   }
 
@@ -155,6 +168,7 @@ class PvtConfig {
         'enableSound: $enableSound, '
         'enableHaptic: $enableHaptic, '
         'countdownDuration: $countdownDuration, '
-        'enablePracticeTest: $enablePracticeTest)';
+        'enablePracticeTest: $enablePracticeTest, '
+        'stimulusTimeout: $stimulusTimeout)';
   }
 }
